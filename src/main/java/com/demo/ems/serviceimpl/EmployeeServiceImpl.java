@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import com.demo.ems.dto.EmployeeDTO;
 import com.demo.ems.model.Employee;
@@ -20,12 +21,13 @@ public class EmployeeServiceImpl implements EmployeeService {
 	EmployeeDTO employeeDTO;
 	@Autowired
 	Employee employeeEntity;
-
+	@Autowired
+	RestTemplate restTemplate;
+	
 	@Override
 	public EmployeeDTO getEmplpyeeDetailById(Long Id) {
-		Optional<Employee> emp = employeeRepository.findById(Id);
-		if (emp.isPresent()) {
-			employeeEntity = emp.get();
+		employeeEntity = restTemplate.getForObject("http://localhost:9091/ems/id/"+Id, Employee.class);
+		if (employeeEntity!=null) {
 			employeeDTO = EmployeeDTO.toDTO(employeeEntity);
 		}
 		return employeeDTO;
@@ -33,8 +35,8 @@ public class EmployeeServiceImpl implements EmployeeService {
 
 	@Override
 	public EmployeeDTO addEmployeeDetails(Employee employee) {
-		employee = employeeRepository.save(employee);
-		employeeDTO = EmployeeDTO.toDTO(employee);
+	employeeEntity = restTemplate.postForObject("http://localhost:9091/ems/",employee,Employee.class);
+	employeeDTO = EmployeeDTO.toDTO(employeeEntity);
 		return employeeDTO;
 	}
 
